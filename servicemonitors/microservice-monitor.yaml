@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: production-microservices-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      monitoring: "prometheus"
+  namespaceSelector:
+    matchNames:
+      - "production"
+      - "staging"
+  endpoints:
+    - port: "metrics"
+      interval: "15s"
+      path: "/metrics"
+      scrapeTimeout: "10s"

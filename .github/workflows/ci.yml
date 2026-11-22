@@ -1,0 +1,23 @@
+name: "Observability Stack CI"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Kubernetes Manifests
+        uses: instrumenta/kubeval-action@master
+        with:
+          files: 'argocd,prometheus-rules,servicemonitors'
+      - name: Trivy Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: true
+          severity: 'CRITICAL,HIGH'

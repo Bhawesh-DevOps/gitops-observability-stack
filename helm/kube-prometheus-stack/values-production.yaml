@@ -1,0 +1,70 @@
+# Production Hardened Values for Kube-Prometheus-Stack via ArgoCD
+global:
+  rbac:
+    create: true
+
+prometheus:
+  prometheusSpec:
+    replicas: 2
+    retention: 30d
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    podAntiAffinity: "hard"
+    securityContext:
+      runAsUser: 65534
+      runAsNonRoot: true
+      fsGroup: 65534
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "2Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "managed-csi-premium"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 100Gi
+
+alertmanager:
+  alertmanagerSpec:
+    replicas: 2
+    securityContext:
+      runAsUser: 65534
+      runAsNonRoot: true
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "managed-csi-premium"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+grafana:
+  enabled: true
+  replicas: 2
+  adminPassword: "CHANGE_ME_IN_VAULT"
+  securityContext:
+    runAsUser: 472
+    runAsNonRoot: true
+  persistence:
+    enabled: true
+    storageClassName: "managed-csi-premium"
+    size: 20Gi
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: true
+          editable: false
+          options:
+            path: /var/lib/grafana/dashboards/default
